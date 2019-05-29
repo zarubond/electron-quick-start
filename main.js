@@ -11,7 +11,8 @@ function createWindow () {
     width: 800,
     height: 600,
     webPreferences: {
-      nodeIntegration: true
+      nodeIntegration: true,
+      nativeWindowOpen: true
     }
   })
 
@@ -27,6 +28,22 @@ function createWindow () {
     // in an array if your app supports multi windows, this is the time
     // when you should delete the corresponding element.
     mainWindow = null
+  })
+
+  mainWindow.webContents.on('new-window', (event, url, frameName, disposition, options, additionalFeatures) => {
+    if (frameName === 'modal') {
+      // open window as modal
+      event.preventDefault()
+      Object.assign(options, {
+        modal: true,
+        parent: mainWindow,
+        width: 640,
+        height: 480
+      })
+      const modal = new BrowserWindow(options);
+      modal.setAlwaysOnTop(false, 'normal');
+      event.newGuest = modal
+    }
   })
 }
 
