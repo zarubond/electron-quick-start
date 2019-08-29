@@ -12,7 +12,12 @@ function createWindow () {
     width: 800,
     height: 600,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js')
+      preload: path.join(__dirname, 'preload.js'),
+      'nodeIntegration': false,
+      'webviewTag': true,
+      'webSecurity': true,
+      'nativeWindowOpen': true,
+      'nodeIntegrationInSubFrames': true
     }
   })
 
@@ -29,6 +34,19 @@ function createWindow () {
     // when you should delete the corresponding element.
     mainWindow = null
   })
+
+  mainWindow.webContents.on('new-window', (event, urlParam, frameName, disposition, options) => {
+    event.preventDefault()
+    Object.assign(options, {
+      width: 640,
+      height: 480,
+      zoomFactor: 3.0
+    })
+    event.newGuest = new BrowserWindow(options);
+    event.newGuest.once('ready-to-show', () => {
+      event.newGuest.webContents.setZoomLevel(4);
+    });
+  });
 }
 
 // This method will be called when Electron has finished
