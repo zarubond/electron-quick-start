@@ -11,9 +11,25 @@ function createWindow () {
     width: 800,
     height: 600,
     webPreferences: {
-      nodeIntegration: true
+      nativeWindowOpen: true
     }
   })
+
+  mainWindow.webContents.on('new-window', (event, url, frameName, disposition, options, additionalFeatures) => {
+  if (frameName === 'modal') {
+    // open window as modal
+    event.preventDefault()
+    Object.assign(options, {
+      modal: true,
+      frame: false,
+      transparent: true, // <<<< HERE
+      alwaysOnTop: true,
+      width: 100,
+      height: 100
+    })
+    event.newGuest = new BrowserWindow(options)
+  }
+})
 
   // and load the index.html of the app.
   mainWindow.loadFile('index.html')
@@ -37,15 +53,19 @@ app.on('ready', createWindow)
 
 // Quit when all windows are closed.
 app.on('window-all-closed', function () {
-  // On macOS it is common for applications and their menu bar
+  // On OS X it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
-  if (process.platform !== 'darwin') app.quit()
+  if (process.platform !== 'darwin') {
+    app.quit()
+  }
 })
 
 app.on('activate', function () {
-  // On macOS it's common to re-create a window in the app when the
+  // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
-  if (mainWindow === null) createWindow()
+  if (mainWindow === null) {
+    createWindow()
+  }
 })
 
 // In this file you can include the rest of your app's specific main process
