@@ -1,30 +1,54 @@
 // Modules to control application life and create native browser window
-const {app, BrowserWindow} = require('electron')
+const { app, protocol, BrowserWindow } = require('electron')
 const path = require('path')
 
-function createWindow () {
+function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js')
+      preload: path.join(__dirname, 'preload.js'),
+      nativeWindowOpen: true,
+      nodeIntegration: false,
+      webviewTag: true,
+      webSecurity: true,
+      nativeWindowOpen: true,
+      nodeIntegrationInSubFrames: true,
+      spellcheck: true,
+      enableRemoteModule: false,
+      backgroundThrottling: false,
+      worldSafeExecuteJavaScript: true
     }
   })
 
   // and load the index.html of the app.
-  mainWindow.loadFile('index.html')
+  mainWindow.loadURL('file:///index.html')
 
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
 }
 
+app.commandLine.appendSwitch('disable-background-timer-throttling');
+app.commandLine.appendSwitch('disable-renderer-backgrounding');
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
+
+  protocol.interceptFileProtocol('file', function (request, callback) {
+    const time = new Date().toISOString()
+
+    const url = request.url.substr(7);
+    console.log(url);
+    const p = path.normalize(app.getAppPath() + url);
+    console.log(time + '>' + p);
+    callback(p);
+  });
+
   createWindow()
-  
+
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
