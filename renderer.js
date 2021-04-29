@@ -4,3 +4,13 @@
 // `nodeIntegration` is turned off. Use `preload.js` to
 // selectively enable features needed in the rendering
 // process.
+
+
+function openWindow() {
+    const childWindow = window.open(undefined, 'modal#dadasd', 'copyhistory=no,menubar=no,toolbar=no')
+    childWindow.document.body.innerText = 'Now you see me!!!';
+}
+
+function openMenu() {
+    window.showMenu();
+}

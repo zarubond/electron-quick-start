@@ -10,3 +10,13 @@ window.addEventListener('DOMContentLoaded', () => {
     replaceText(`${type}-version`, process.versions[type])
   }
 })
+
+const { ipcRenderer } = require('electron');
+
+ipcRenderer.on('context-menu-command', (e, command) => {
+  openWindow();
+})
+
+window.showMenu = () => {
+  ipcRenderer.send('show-context-menu')
+}

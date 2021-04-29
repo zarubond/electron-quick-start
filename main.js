@@ -1,22 +1,42 @@
 // Modules to control application life and create native browser window
-const {app, BrowserWindow} = require('electron')
+const { app, BrowserWindow, ipcMain, Menu } = require('electron')
 const path = require('path')
 
-function createWindow () {
+function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js')
+      preload: path.join(__dirname, 'preload.js'),
+      nativeWindowOpen: true
     }
+  })
+
+  mainWindow.webContents.on('new-window', (event, url, frameName, disposition, options, additionalFeatures) => {
+    // open window as modal
+    event.preventDefault()
+    Object.assign(options, {
+      width: 640,
+      height: 480,
+    })
+    event.newGuest = new BrowserWindow(options)
+
   })
 
   // and load the index.html of the app.
   mainWindow.loadFile('index.html')
 
-  // Open the DevTools.
-  // mainWindow.webContents.openDevTools()
+  ipcMain.on('show-context-menu', (event) => {
+    const template = [
+      {
+        label: 'Open window',
+        click: () => { mainWindow.webContents.send('context-menu-command', 'menu-item-1') }
+      },
+    ]
+    const menu = Menu.buildFromTemplate(template)
+    menu.popup(BrowserWindow.fromWebContents(event.sender))
+  })
 }
 
 // This method will be called when Electron has finished
@@ -24,7 +44,7 @@ function createWindow () {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   createWindow()
-  
+
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
